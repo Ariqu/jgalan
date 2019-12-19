@@ -24,3 +24,4 @@ do
     *) "Podaj liczy z zakresu [1..3]" ;;
     esac
 done
+
