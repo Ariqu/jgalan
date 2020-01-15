@@ -2,22 +2,17 @@
 
 user_list=(`cat users.txt`)
 
-function loadUsers() {
-
-
+function showUsers() {
 
     echo "showUsers ..."
-    #ladowanie danych z plikow
-    echo ${user_list[1}
 
-    echo "Lista:"
+    echo "Lista: "
+
+    #ladowanie danych z plikow
 
     for(( i=0; i<=${#user_list[@]}; i++ )) 
     do
-
 	echo "${user_list[i]}"    
-	sudo useradd ${user} -s /sbin/nologin -g "users"
-
     done 
 
 }
@@ -25,24 +20,59 @@ function loadUsers() {
 
 function addUsers() {
 
-    for user in " ${user_list}"
-    do
-    
-	echo "Add user:  ${user}"
-    
-    done
+    echo -n "Are you sure? [y/n]"
+    read sure
+    if [ "${sure}" = "y" ]; then
+
+        for user  in "${user_list[@]}"
+	do
+		echo "Add user: ${user} [OK]"
+		sudo useradd ${user} -s /sbin/nologin -g "users"
+        done    
+
+
+
+
+    fi
 }
 
 function delUsers() {
-    echo "delUsers..."
+    
+echo "delUsers..."
+
+    echo -n "Are you sure? [y/n]"
+    read sure
+    if [ ${sure} == "y" ];then
+	for user in "${user_list[@]}"
+	do
+	    echo "Remove user ${user} [OK]"
+	    sudo userdel ${user}
+	done
+fi
+
+
 }
 
 function acceptRemoteLogin() {
     echo "accRemLog.."
+
+    for user in "${user_list[@]}"
+    do
+	echo "Accept remote login for ${user} [OK]"
+	sudo usermod -s /bin/bash ${user}
+done
+
 }
 
 function deniedRemoteLogin() {
     echo "denRemLog..."
+
+    for user in "${user_list[@]}"
+    do
+	echo "Denied remote Login for ${user} [OK]"
+    sudo usermod -s /sbin/noLogin ${user}
+done
+
 }
 
 function quit() {
@@ -67,7 +97,7 @@ EndOfMessage
 
 
 
-select option in SU HELP AU DU ARL DRL HELP Quit 
+select option in SU AU DU ARL DRL HELP Quit 
 do
     case ${option} in
 	"SU") showUsers ;;
@@ -77,6 +107,7 @@ do
 	"DRL") deniedRemoteLogin ;;
 	"HELP") help ;;
 	"Quit") quit ;;
+	*) help
     esac 
 done
 
