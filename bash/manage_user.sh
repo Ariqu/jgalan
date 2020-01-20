@@ -2,6 +2,20 @@
 
 user_list=(`cat users.txt`)
 
+RED='e[31m'
+NC='\033[0m'
+GREEN='\033[0m'
+
+
+function checkStatusCode() {
+    if [ $? == 0 ]; then
+	status="${GREEN}PASS${NC}"
+    else
+	status="FAIL"
+    fi
+
+}
+
 function showUsers() {
 
     echo "showUsers ..."
@@ -26,8 +40,12 @@ function addUsers() {
 
         for user  in "${user_list[@]}"
 	do
-		echo "Add user: ${user} [OK]"
-		sudo useradd ${user} -s /sbin/nologin -g "users"
+	    sudo useradd ${user} -m -s /sbin/noLogin -g "users" 2> /dev/null
+	
+	    checkStatusCode	    
+
+	    echo "Add user: ${user} [${status}]"
+
         done    
 
 
@@ -45,9 +63,13 @@ echo "delUsers..."
     if [ ${sure} == "y" ];then
 	for user in "${user_list[@]}"
 	do
-	    echo "Remove user ${user} [OK]"
-	    sudo userdel ${user}
-	done
+
+	    sudo userdel -r ${user} 2> /dev/null
+	
+	    checkStatusCode
+
+	    echo "Remove user ${user} [${status}]"
+    done
 fi
 
 
@@ -58,9 +80,11 @@ function acceptRemoteLogin() {
 
     for user in "${user_list[@]}"
     do
-	echo "Accept remote login for ${user} [OK]"
-	sudo usermod -s /bin/bash ${user}
-done
+
+	sudo usermod -s /bin/bash ${user} 2> /dev/null
+	checkStatusCode
+	echo "Accept remote login for ${user} [ok] "
+    done
 
 }
 
@@ -70,6 +94,7 @@ function deniedRemoteLogin() {
     for user in "${user_list[@]}"
     do
 	echo "Denied remote Login for ${user} [OK]"
+	chechStatusCode
     sudo usermod -s /sbin/noLogin ${user}
 done
 
@@ -110,6 +135,8 @@ do
 	*) help
     esac 
 done
+
+
 
 
 
