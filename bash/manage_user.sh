@@ -2,28 +2,23 @@
 
 user_list=(`cat users.txt`)
 
-RED='e[31m'
-NC='\033[0m'
-GREEN='\033[0m'
-
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\e[0m'
 
 function checkStatusCode() {
     if [ $? == 0 ]; then
-	status="${GREEN}PASS${NC}"
+	status="${GREEN} [PASS] ${NC}"
     else
-	status="FAIL"
+	status="${RED} [FAIL] ${NC}"
     fi
 
 }
 
 function showUsers() {
-
     echo "showUsers ..."
-
     echo "Lista: "
-
     #ladowanie danych z plikow
-
     for(( i=0; i<=${#user_list[@]}; i++ )) 
     do
 	echo "${user_list[i]}"    
@@ -37,20 +32,13 @@ function addUsers() {
     echo -n "Are you sure? [y/n]"
     read sure
     if [ "${sure}" = "y" ]; then
-
         for user  in "${user_list[@]}"
 	do
-	    sudo useradd ${user} -m -s /sbin/noLogin -g "users" 2> /dev/null
-	
-	    checkStatusCode	    
-
-	    echo "Add user: ${user} [${status}]"
-
-        done    
-
-
-
-
+	    sudo useradd ${user} -m -s /sbin/nologin -g "users" 2> /dev/null
+	    checkStatusCode
+	    #echo "Add user: ${user} [${status}]"
+	    printf "Add user %10b %20b\n" "${user}" "${status}"
+        done
     fi
 }
 
@@ -65,10 +53,9 @@ echo "delUsers..."
 	do
 
 	    sudo userdel -r ${user} 2> /dev/null
-	
 	    checkStatusCode
-
-	    echo "Remove user ${user} [${status}]"
+	    #echo -e "Remove user ${user} [${status}]"
+	    printf "Remove user %10b %20b\n" "${user}" "${status}"
     done
 fi
 
@@ -83,7 +70,8 @@ function acceptRemoteLogin() {
 
 	sudo usermod -s /bin/bash ${user} 2> /dev/null
 	checkStatusCode
-	echo "Accept remote login for ${user} [ok] "
+	#echo "Accept remote login for ${user} [ok] "
+	printf "Accept remote login for %10b %20b\n"  "${user}" "${status}"
     done
 
 }
@@ -93,9 +81,10 @@ function deniedRemoteLogin() {
 
     for user in "${user_list[@]}"
     do
-	echo "Denied remote Login for ${user} [OK]"
+	#echo "Denied remote Login for ${user} [OK]"
 	chechStatusCode
     sudo usermod -s /sbin/noLogin ${user}
+    printf "Denied remote login for %10b %20b\n" "${user}" "${stauts}"
 done
 
 }
